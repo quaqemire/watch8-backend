@@ -1,0 +1,42 @@
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String
+  role        String   @default("USER")
+  banned      Boolean  @default(false)
+  banReason   String?
+  createdAt   DateTime @default(now())
+
+  orders      Order[]
+}
+
+model Category {
+  id      Int      @id @default(autoincrement())
+  name    String
+  devices Device[]
+}
+
+model Device {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  price       Int
+  image       String
+  createdAt   DateTime @default(now())
+
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  orders Order[]
+}
+
+model Order {
+  id       Int     @id @default(autoincrement())
+  userId   Int
+  user     User    @relation(fields: [userId], references: [id])
+
+  deviceId Int
+  device   Device  @relation(fields: [deviceId], references: [id])
+
+  createdAt DateTime @default(now())
+}
