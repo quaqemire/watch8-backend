@@ -1,42 +1,90 @@
-model User {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique
-  password    String
-  role        String   @default("USER")
-  banned      Boolean  @default(false)
-  banReason   String?
-  createdAt   DateTime @default(now())
-
-  orders      Order[]
+generator client {
+  provider = "prisma-client-js"
 }
 
-model Category {
-  id      Int      @id @default(autoincrement())
-  name    String
-  devices Device[]
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+
+  refreshToken String?
+
+  basket    Basket?
+
+  createdAt DateTime @default(now())
+}
+
+model Basket {
+  id      Int @id @default(autoincrement())
+
+  userId  Int @unique
+  user    User @relation(fields: [userId], references: [id])
+
+  devices BasketDevice[]
+
+  createdAt DateTime @default(now())
+}
+
+model BasketDevice {
+  id       Int @id @default(autoincrement())
+
+  basketId Int
+  basket   Basket @relation(fields: [basketId], references: [id])
+
+  deviceId Int
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model Device {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  price       Int
-  image       String
-  createdAt   DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  price     Int
+  image     String
 
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
+  typeId  Int
+  type    Type  @relation(fields: [typeId], references: [id])
 
-  orders Order[]
+  brandId Int
+  brand   Brand @relation(fields: [brandId], references: [id])
+
+  basketDevices BasketDevice[]
+  info          DeviceInfo[]
+
+  createdAt DateTime @default(now())
 }
 
-model Order {
-  id       Int     @id @default(autoincrement())
-  userId   Int
-  user     User    @relation(fields: [userId], references: [id])
+model Type {
+  id     Int @id @default(autoincrement())
+  name   String @unique
+
+  devices Device[]
+
+  createdAt DateTime @default(now())
+}
+
+model Brand {
+  id     Int @id @default(autoincrement())
+  name   String @unique
+
+  devices Device[]
+
+  createdAt DateTime @default(now())
+}
+
+model DeviceInfo {
+  id          Int @id @default(autoincrement())
+  title       String
+  description String
 
   deviceId Int
-  device   Device  @relation(fields: [deviceId], references: [id])
+  device   Device @relation(fields: [deviceId], references: [id])
 
   createdAt DateTime @default(now())
 }
